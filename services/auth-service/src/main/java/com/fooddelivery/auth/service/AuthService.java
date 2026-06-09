@@ -13,12 +13,21 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     public AuthService(UserRepository userRepository,
+                       PasswordEncoder passwordEncoder,
+                       JwtService jwtService) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
+    }
+
+   /* public AuthService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-    }
+    }*/
 
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -33,7 +42,8 @@ public class AuthService {
 
         userRepository.save(user);
 
-        return new AuthResponse("REGISTER_SUCCESS");
+        String token = jwtService.generateToken(user.getEmail());
+        return new AuthResponse(token);
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -44,6 +54,7 @@ public class AuthService {
             throw new RuntimeException("Invalid email or password");
         }
 
-        return new AuthResponse("LOGIN_SUCCESS");
+        String token = jwtService.generateToken(user.getEmail());
+        return new AuthResponse(token);
     }
 }

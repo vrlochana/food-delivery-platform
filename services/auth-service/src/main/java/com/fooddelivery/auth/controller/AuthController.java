@@ -6,6 +6,7 @@ import com.fooddelivery.auth.dto.RegisterRequest;
 import com.fooddelivery.auth.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -25,5 +26,10 @@ public class AuthController {
     @PostMapping("/login")
     public AuthResponse login(@Valid @RequestBody LoginRequest request) {
         return authService.login(request);
+    }
+
+    @GetMapping("/profile")
+    public String profile(HttpServletRequest request) {
+        return "Protected profile API. Logged in user: " + request.getAttribute("userEmail");
     }
 }
