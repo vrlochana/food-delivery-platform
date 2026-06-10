@@ -7,6 +7,8 @@ import com.fooddelivery.auth.entity.User;
 import com.fooddelivery.auth.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.fooddelivery.auth.client.UserServiceClient;
+import com.fooddelivery.auth.dto.UserProfileRequest;
 
 @Service
 public class AuthService {
@@ -14,13 +16,24 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final UserServiceClient userServiceClient;
 
-    public AuthService(UserRepository userRepository,
+    /*public AuthService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
                        JwtService jwtService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+    }*/
+
+    public AuthService(UserRepository userRepository,
+                       PasswordEncoder passwordEncoder,
+                       JwtService jwtService,
+                       UserServiceClient userServiceClient) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
+        this.userServiceClient = userServiceClient;
     }
 
    /* public AuthService(UserRepository userRepository,
@@ -41,7 +54,9 @@ public class AuthService {
         user.setRole(request.getRole());
 
         userRepository.save(user);
-
+        userServiceClient.createProfile(
+                new UserProfileRequest(user.getFullName(), user.getEmail())
+        );
         String token = jwtService.generateToken(user.getEmail());
         return new AuthResponse(token);
     }
