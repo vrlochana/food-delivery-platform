@@ -77,4 +77,19 @@ public class RestaurantController {
                         request
                 );
     }
+
+    @DeleteMapping("/{id}")
+    public String deleteRestaurant(@PathVariable Long id) {
+        restaurantService.deleteRestaurant(id);
+        return "Restaurant deleted successfully";
+    }
+
+    @GetMapping("/search")
+    public List<RestaurantResponse> searchRestaurants(
+            @RequestParam String name
+    ) {
+
+        return restaurantService
+                .searchRestaurants(name);
+    }
 }

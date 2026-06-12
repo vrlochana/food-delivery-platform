@@ -4,13 +4,13 @@ import jakarta.validation.constraints.NotBlank;
 
 public class CreateRestaurantRequest {
 
-    @NotBlank
+    @NotBlank(message = "Restaurant name is required")
     private String name;
 
-    @NotBlank
+    @NotBlank(message = "Address is required")
     private String address;
 
-    @NotBlank
+    @NotBlank(message = "Cuisine is required")
     private String cuisine;
 
     public String getName() {

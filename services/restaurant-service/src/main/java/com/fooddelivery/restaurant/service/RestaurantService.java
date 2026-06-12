@@ -57,6 +57,18 @@ public class RestaurantService {
                 .toList();
     }
 
+
+    public List<RestaurantResponse> searchRestaurants(
+            String name
+    ) {
+
+        return restaurantRepository
+                .findByNameContainingIgnoreCase(name)
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
     public RestaurantResponse deactivateRestaurant(
             Long id
     ) {
@@ -117,6 +129,16 @@ public class RestaurantService {
                 );
 
         return mapToResponse(saved);
+    }
+
+    public void deleteRestaurant(Long id) {
+
+        Restaurant restaurant =
+                restaurantRepository.findById(id)
+                        .orElseThrow(() ->
+                                new RuntimeException("Restaurant not found"));
+
+        restaurantRepository.delete(restaurant);
     }
 
 
