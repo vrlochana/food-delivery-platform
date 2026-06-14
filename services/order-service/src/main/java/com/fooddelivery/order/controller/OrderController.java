@@ -52,5 +52,10 @@ public class OrderController {
         return orderService.updateOrderStatus(id, status);
     }
 
+    @GetMapping("/restaurant/{restaurantId}")
+    public List<OrderResponse> getOrdersByRestaurant(@PathVariable Long restaurantId) {
+        return orderService.getOrdersByRestaurant(restaurantId);
+    }
+
 
 }

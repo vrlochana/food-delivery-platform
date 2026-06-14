@@ -91,6 +91,14 @@ public class OrderService {
     }*/
 
 
+    public List<OrderResponse> getOrdersByRestaurant(Long restaurantId) {
+        return orderRepository.findByRestaurantId(restaurantId)
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+
     private OrderResponse mapToResponse(Order order) {
         List<OrderItemResponse> items = order.getItems()
                 .stream()
