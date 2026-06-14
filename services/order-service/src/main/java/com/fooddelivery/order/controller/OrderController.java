@@ -1,5 +1,6 @@
 package com.fooddelivery.order.controller;
 
+import com.fooddelivery.order.client.PaymentClient;
 import com.fooddelivery.order.dto.CreateOrderRequest;
 import com.fooddelivery.order.dto.OrderResponse;
 import com.fooddelivery.order.enums.OrderStatus;
@@ -14,9 +15,13 @@ import java.util.List;
 public class OrderController {
 
     private final OrderService orderService;
+    private final PaymentClient paymentClient;
 
-    public OrderController(OrderService orderService) {
+    public OrderController(
+            OrderService orderService,
+            PaymentClient paymentClient) {
         this.orderService = orderService;
+        this.paymentClient = paymentClient;
     }
 
     @GetMapping("/health")
@@ -27,6 +32,11 @@ public class OrderController {
     @PostMapping
     public OrderResponse createOrder(@Valid @RequestBody CreateOrderRequest request) {
         return orderService.createOrder(request);
+    }
+
+    @GetMapping("/test-payment")
+    public String testPaymentService() {
+        return paymentClient.checkPayment();
     }
 
     @GetMapping("/{id}")
@@ -56,6 +66,8 @@ public class OrderController {
     public List<OrderResponse> getOrdersByRestaurant(@PathVariable Long restaurantId) {
         return orderService.getOrdersByRestaurant(restaurantId);
     }
+
+
 
 
 }
