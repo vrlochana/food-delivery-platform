@@ -3,3 +3,15 @@ spring:
     name: order-service
   config:
     import: optional:configserver:http://localhost:8888
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
+  resilience4j:
+    circuitbreaker:
+      instances:
+        PAYMENT-SERVICE:
+          registerHealthIndicator: true
+          slidingWindowSize: 5
+          minimumNumberOfCalls: 2
+          failureRateThreshold: 50
