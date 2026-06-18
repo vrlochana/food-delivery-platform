@@ -9,6 +9,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.fooddelivery.auth.client.UserServiceClient;
 import com.fooddelivery.auth.dto.UserProfileRequest;
+import com.fooddelivery.auth.exception.UserAlreadyExistsException;
+import com.fooddelivery.auth.exception.InvalidCredentialsException;
 
 @Service
 public class AuthService {
@@ -43,8 +45,8 @@ public class AuthService {
     }*/
 
     public AuthResponse register(RegisterRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already registered");
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new UserAlreadyExistsException("User already exists with email: " + request.getEmail());
         }
 
         User user = new User();
@@ -57,19 +59,19 @@ public class AuthService {
         userServiceClient.createProfile(
                 new UserProfileRequest(user.getFullName(), user.getEmail())
         );
-        String token = jwtService.generateToken(user.getEmail());
+        String token = jwtService.generateToken(user.getEmail(), user.getRole().name());
         return new AuthResponse(token);
     }
 
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Invalid email or password"));
+                .orElseThrow(() -> new InvalidCredentialsException("Invalid email or password"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid email or password");
+            throw new InvalidCredentialsException("Invalid email or password");
         }
 
-        String token = jwtService.generateToken(user.getEmail());
+        String token = jwtService.generateToken(user.getEmail(), user.getRole().name());
         return new AuthResponse(token);
     }
 }

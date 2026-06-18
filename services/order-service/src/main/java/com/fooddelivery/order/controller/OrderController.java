@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/orders")
@@ -25,8 +26,29 @@ public class OrderController {
     }
 
     @GetMapping("/health")
-    public String health() {
-        return "Order Service Running";
+    public Map<String, String> health(
+            @RequestHeader(value = "X-User-Email", required = false) String email,
+            @RequestHeader(value = "X-User-Role", required = false) String role
+    ) {
+
+        return Map.of(
+                "service", "order-service",
+                "userEmail", String.valueOf(email),
+                "userRole", String.valueOf(role)
+        );
+    }
+
+    @GetMapping("/admin/test")
+    public Map<String, String> adminTest(
+            @RequestHeader(value = "X-User-Email", required = false) String email,
+            @RequestHeader(value = "X-User-Role", required = false) String role
+    ) {
+        return Map.of(
+                "service", "order-service",
+                "endpoint", "admin-test",
+                "userEmail", String.valueOf(email),
+                "userRole", String.valueOf(role)
+        );
     }
 
     @PostMapping
@@ -66,8 +88,4 @@ public class OrderController {
     public List<OrderResponse> getOrdersByRestaurant(@PathVariable Long restaurantId) {
         return orderService.getOrdersByRestaurant(restaurantId);
     }
-
-
-
-
 }

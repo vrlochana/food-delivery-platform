@@ -1,10 +1,12 @@
 package com.fooddelivery.auth.controller;
 
+import com.fooddelivery.auth.dto.ApiResponse;
 import com.fooddelivery.auth.dto.AuthResponse;
 import com.fooddelivery.auth.dto.LoginRequest;
 import com.fooddelivery.auth.dto.RegisterRequest;
 import com.fooddelivery.auth.service.AuthService;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -18,14 +20,40 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @PostMapping("/register")
+   /* @PostMapping("/register")
     public AuthResponse register(@Valid @RequestBody RegisterRequest request) {
         return authService.register(request);
+    }*/
+
+    @PostMapping("/register")
+    public ResponseEntity<ApiResponse<AuthResponse>> register(
+            @RequestBody RegisterRequest request
+    ) {
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "User registered successfully",
+                        authService.register(request)
+                )
+        );
     }
 
-    @PostMapping("/login")
+    /*@PostMapping("/login")
     public AuthResponse login(@Valid @RequestBody LoginRequest request) {
         return authService.login(request);
+    }*/
+
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<AuthResponse>> login(
+            @RequestBody LoginRequest request
+    ) {
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Login successful",
+                        authService.login(request)
+                )
+        );
     }
 
     @GetMapping("/profile")

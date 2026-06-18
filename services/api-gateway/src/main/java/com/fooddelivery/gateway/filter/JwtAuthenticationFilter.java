@@ -48,10 +48,17 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
                     .getPayload();
 
             String email = claims.getSubject();
+            String role = claims.get("role", String.class);
+
+            if (path.contains("/admin") && !"ADMIN".equalsIgnoreCase(role)) {
+                exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
+                return exchange.getResponse().setComplete();
+            }
 
             ServerWebExchange mutatedExchange = exchange.mutate()
                     .request(exchange.getRequest().mutate()
                             .header("X-User-Email", email)
+                            .header("X-User-Role", role)
                             .build())
                     .build();
 
