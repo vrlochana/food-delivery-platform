@@ -1,6 +1,7 @@
 package com.fooddelivery.payment.controller;
 
 import com.fooddelivery.payment.dto.CreatePaymentRequest;
+import com.fooddelivery.payment.dto.PaymentRequest;
 import com.fooddelivery.payment.dto.PaymentResponse;
 import com.fooddelivery.payment.enums.PaymentStatus;
 import com.fooddelivery.payment.service.PaymentService;
@@ -24,14 +25,28 @@ public class PaymentController {
         return "Payment Service Running";
     }
 
+    @PostMapping("/process")
+    public PaymentResponse processPayment(
+            @Valid @RequestBody PaymentRequest request
+    ) {
+        return paymentService.processPayment(request);
+    }
+
     @PostMapping
     public PaymentResponse createPayment(@Valid @RequestBody CreatePaymentRequest request) {
         return paymentService.createPayment(request);
     }
 
-    @GetMapping("/{id}")
+   /* @GetMapping("/{id}")
     public PaymentResponse getPayment(@PathVariable Long id) {
         return paymentService.getPayment(id);
+    }*/
+
+    @GetMapping("/{orderId}")
+    public PaymentResponse getPayment(
+            @PathVariable Long orderId
+    ) {
+        return paymentService.getPayment(orderId);
     }
 
     @GetMapping("/order/{orderId}")
@@ -47,8 +62,12 @@ public class PaymentController {
         return paymentService.updatePaymentStatus(id, status);
     }
 
+
+
     @GetMapping
     public List<PaymentResponse> getAllPayments() {
         return paymentService.getAllPayments();
     }
+
+
 }

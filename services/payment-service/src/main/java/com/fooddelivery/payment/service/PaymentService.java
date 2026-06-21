@@ -2,6 +2,7 @@ package com.fooddelivery.payment.service;
 
 import com.fooddelivery.payment.client.OrderClient;
 import com.fooddelivery.payment.dto.CreatePaymentRequest;
+import com.fooddelivery.payment.dto.PaymentRequest;
 import com.fooddelivery.payment.dto.PaymentResponse;
 import com.fooddelivery.payment.entity.Payment;
 import com.fooddelivery.payment.enums.PaymentStatus;
@@ -79,6 +80,26 @@ public class PaymentService {
                 .stream()
                 .map(this::mapToResponse)
                 .toList();
+    }
+
+    public PaymentResponse processPayment(PaymentRequest request) {
+
+        Payment payment = new Payment();
+
+        payment.setOrderId(request.getOrderId());
+        payment.setAmount(request.getAmount());
+        payment.setStatus(PaymentStatus.SUCCESS);
+
+        Payment saved = paymentRepository.save(payment);
+
+        PaymentResponse response = new PaymentResponse();
+
+        response.setId(saved.getId());
+        response.setOrderId(saved.getOrderId());
+        response.setAmount(saved.getAmount());
+        response.setStatus(saved.getStatus());
+
+        return response;
     }
 
     private PaymentResponse mapToResponse(Payment payment) {

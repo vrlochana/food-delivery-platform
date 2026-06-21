@@ -1,9 +1,12 @@
 package com.fooddelivery.order.service;
 
+import com.fooddelivery.order.client.PaymentClient;
 import com.fooddelivery.order.dto.CreateOrderItemRequest;
 import com.fooddelivery.order.dto.CreateOrderRequest;
 import com.fooddelivery.order.dto.OrderItemResponse;
 import com.fooddelivery.order.dto.OrderResponse;
+import com.fooddelivery.order.dto.PaymentRequest;
+import com.fooddelivery.order.dto.PaymentResponse;
 import com.fooddelivery.order.entity.Order;
 import com.fooddelivery.order.entity.OrderItem;
 import com.fooddelivery.order.enums.OrderStatus;
@@ -16,9 +19,14 @@ import java.util.List;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final PaymentClient paymentClient;
 
-    public OrderService(OrderRepository orderRepository) {
+    public OrderService(
+            OrderRepository orderRepository,
+            PaymentClient paymentClient
+    ) {
         this.orderRepository = orderRepository;
+        this.paymentClient = paymentClient;
     }
 
     public OrderResponse createOrder(CreateOrderRequest request) {
@@ -40,6 +48,27 @@ public class OrderService {
         }
 
         Order saved = orderRepository.save(order);
+
+        PaymentRequest paymentRequest =
+                new PaymentRequest(
+                        saved.getId(),
+                        calculateTotalAmount(saved),
+                        "UPI"
+                );
+
+        PaymentResponse paymentResponse =
+                paymentClient.processPayment(paymentRequest);
+        System.out.println("Calling payment service with orderId: " + saved.getId());
+        System.out.println("Amount: " + calculateTotalAmount(saved));
+        System.out.println("Payment method: UPI");
+
+        if (paymentResponse != null && "SUCCESS".equals(paymentResponse.getStatus())) {
+            saved.setStatus(OrderStatus.CONFIRMED);
+        } else {
+            saved.setStatus(OrderStatus.CANCELLED);
+        }
+
+        saved = orderRepository.save(saved);
 
         return mapToResponse(saved);
     }
@@ -70,7 +99,6 @@ public class OrderService {
         return mapToResponse(saved);
     }
 
-
     public List<OrderResponse> getAllOrders() {
 
         return orderRepository
@@ -80,17 +108,6 @@ public class OrderService {
                 .toList();
     }
 
- /*@Override
-    public List<OrderResponse> getOrdersByUser(Long userId) {
-
-        return orderRepository
-                .findByUserId(userId)
-                .stream()
-                .map(this::mapToResponse)
-                .toList();
-    }*/
-
-
     public List<OrderResponse> getOrdersByRestaurant(Long restaurantId) {
         return orderRepository.findByRestaurantId(restaurantId)
                 .stream()
@@ -98,6 +115,12 @@ public class OrderService {
                 .toList();
     }
 
+    private Double calculateTotalAmount(Order order) {
+        return order.getItems()
+                .stream()
+                .mapToDouble(item -> item.getPrice() * item.getQuantity())
+                .sum();
+    }
 
     private OrderResponse mapToResponse(Order order) {
         List<OrderItemResponse> items = order.getItems()
@@ -109,8 +132,6 @@ public class OrderService {
                         item.getQuantity()
                 ))
                 .toList();
-
-
 
         return new OrderResponse(
                 order.getId(),
