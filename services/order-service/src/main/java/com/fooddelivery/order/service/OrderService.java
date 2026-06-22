@@ -12,6 +12,8 @@ import com.fooddelivery.order.entity.OrderItem;
 import com.fooddelivery.order.enums.OrderStatus;
 import com.fooddelivery.order.repository.OrderRepository;
 import org.springframework.stereotype.Service;
+/*import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;*/
 
 import java.util.List;
 
@@ -27,6 +29,8 @@ public class OrderService {
     ) {
         this.orderRepository = orderRepository;
         this.paymentClient = paymentClient;
+
+
     }
 
     public OrderResponse createOrder(CreateOrderRequest request) {
@@ -56,18 +60,20 @@ public class OrderService {
                         "UPI"
                 );
 
-        PaymentResponse paymentResponse =
-                paymentClient.processPayment(paymentRequest);
-        System.out.println("Calling payment service with orderId: " + saved.getId());
-        System.out.println("Amount: " + calculateTotalAmount(saved));
-        System.out.println("Payment method: UPI");
+
+        PaymentResponse paymentResponse = null;
+
+        try {
+            paymentResponse = paymentClient.processPayment(paymentRequest);
+        } catch (Exception ex) {
+            System.out.println("Payment service failed: " + ex.getMessage());
+        }
 
         if (paymentResponse != null && "SUCCESS".equals(paymentResponse.getStatus())) {
             saved.setStatus(OrderStatus.CONFIRMED);
         } else {
             saved.setStatus(OrderStatus.CANCELLED);
         }
-
         saved = orderRepository.save(saved);
 
         return mapToResponse(saved);
@@ -114,6 +120,17 @@ public class OrderService {
                 .map(this::mapToResponse)
                 .toList();
     }
+
+    /*@CircuitBreaker(name = "paymentService", fallbackMethod = "paymentFallback")
+    @Retry(name = "paymentService")
+    public PaymentResponse callPaymentService(PaymentRequest paymentRequest) {
+        return paymentClient.processPayment(paymentRequest);
+    }
+
+    public PaymentResponse paymentFallback(PaymentRequest paymentRequest, Throwable throwable) {
+        System.out.println("Payment service failed: " + throwable.getMessage());
+        return null;
+    }*/
 
     private Double calculateTotalAmount(Order order) {
         return order.getItems()
