@@ -41,3 +41,44 @@ build/
 
 # Logs
 logs/
+
+# Java
+target/
+build/
+.gradle/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Environment
+.env
+application-local.yml
+
+# Maven
+.mvn/
+
+# Generated
+out/
+
+# Zipkin
+zipkin-data/
+
+# IntelliJ
+*.ipr
+*.iws
+
+# VS Code
+.settings/
+
+# Windows
+desktop.ini
